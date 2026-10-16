@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
-    "build": "next build --webpack",
+    "build": "next build --webpack && node scripts/copy-static.mjs",
     "start": "next start -p 3002",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:webpack": "next build --webpack && node scripts/copy-static.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.55.0",

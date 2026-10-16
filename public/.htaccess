@@ -32,7 +32,7 @@ RewriteBase /
 # Prevent directory listing
 Options -Indexes
 
-# If the requested file or folder exists, serve it directly
+# If the requested file or folder exists in public/ (e.g. _next/static, favicon, images), serve it directly
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
@@ -40,6 +40,3 @@ RewriteRule ^ - [L]
 # For clean URLs without .html
 RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.*)$ $1.html [L]
-
-# SPA fallback to index.html for client-side routing
-RewriteRule ^ index.html [L]
