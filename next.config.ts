@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   experimental: {
     cpus: 1,
   },
+  webpack: (config) => {
+    return config;
+  },
 };
 
 export default nextConfig;
