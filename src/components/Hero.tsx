@@ -161,7 +161,7 @@ export function Hero({ onScrollToAsk }: HeroProps) {
           className="flex items-center justify-center gap-2.5 sm:gap-3.5 mb-3 sm:mb-4 text-center"
         >
           <span
-            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#F6CE46] shadow-[0_0_18px_#F6CE46] animate-pulse shrink-0"
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#F6CE46] ring-2 ring-[#202328]/20 shadow-[0_0_18px_#F6CE46] animate-pulse shrink-0"
             aria-hidden="true"
           />
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#202328] text-center">
@@ -202,6 +202,8 @@ export function Hero({ onScrollToAsk }: HeroProps) {
                 cy="18.5"
                 r="2.5"
                 fill="#F6CE46"
+                stroke="#202328"
+                strokeWidth="0.8"
                 style={{ filter: "drop-shadow(0 0 8px rgba(246, 206, 70, 1))" }}
               />
             </svg>
@@ -211,7 +213,7 @@ export function Hero({ onScrollToAsk }: HeroProps) {
         {/* Sub-headline: Ask in Absolute Confidentiality */}
         <p
           id="sub-headline-confidentiality"
-          className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-neutral-700 mb-6 sm:mb-8 text-center"
+          className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-[#202328]/85 mb-6 sm:mb-8 text-center"
         >
           Ask in Absolute Confidentiality.
         </p>

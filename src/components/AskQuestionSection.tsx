@@ -79,7 +79,7 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
           <button
             type="button"
             onClick={() => setShowToast(false)}
-            className="text-neutral-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
+            className="text-neutral-300 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
             aria-label="Close notification"
           >
             <X className="w-4 h-4" />
@@ -87,12 +87,12 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
         </div>
       )}
 
-      <div className="bg-white/85 backdrop-blur-xl border border-black/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm flex-1 flex flex-col">
+      <div className="bg-white/95 backdrop-blur-xl border border-black/12 rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 border-b border-black/[0.06] pb-5 mb-5 min-h-[64px]">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#F6CE46]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#F6CE46] ring-2 ring-[#202328]/25" />
               <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#202328]">
                 Confidential Inquiry
               </h2>
@@ -124,7 +124,7 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
                   id="category-select"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value as QuestionCategory)}
-                  className="w-full appearance-none bg-[#EBECEF]/50 focus:bg-white text-xs sm:text-sm text-[#202328] font-medium py-3 px-4 pr-10 rounded-2xl border border-black/15 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all cursor-pointer"
+                  className="w-full appearance-none bg-[#EBECEF]/60 focus:bg-white text-xs sm:text-sm text-[#202328] font-medium py-3 px-4 pr-10 rounded-2xl border border-black/20 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all cursor-pointer"
                 >
                   {QUESTION_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat} className="text-[#202328] bg-white py-1">
@@ -132,7 +132,7 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-neutral-600 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
               {/* Optional Custom Topic Input when 'Other' is chosen */}
@@ -144,7 +144,7 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
                     value={customTopic}
                     onChange={(e) => setCustomTopic(e.target.value)}
                     placeholder="Specify your topic (e.g. Identity, Addiction, Healing)..."
-                    className="w-full bg-[#EBECEF]/40 focus:bg-white text-xs sm:text-sm text-[#202328] placeholder-neutral-400 p-3 rounded-xl border border-black/15 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all"
+                    className="w-full bg-[#EBECEF]/40 focus:bg-white text-xs sm:text-sm text-[#202328] placeholder-neutral-500 p-3 rounded-xl border border-black/20 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all"
                   />
                 </div>
               )}
@@ -156,7 +156,7 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
                 <label htmlFor="question-input" className="text-xs font-bold uppercase tracking-wider text-[#202328]">
                   2. Write Your Confidential Question
                 </label>
-                <span className={`text-[11px] font-mono ${charCount < 10 ? "text-neutral-400" : "text-emerald-700 font-semibold"}`}>
+                <span className={`text-[11px] font-mono ${charCount < 10 ? "text-neutral-600 font-medium" : "text-emerald-700 font-bold"}`}>
                   {charCount} characters (min 10)
                 </span>
               </div>
@@ -169,7 +169,7 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
                   value={questionText}
                   onChange={(e) => setQuestionText(e.target.value)}
                   placeholder="Describe your situation, struggle, or spiritual concern with honesty. You don't need to hold back—this is a safe, compassionate space..."
-                  className="w-full flex-1 min-h-[160px] bg-[#EBECEF]/40 focus:bg-white text-xs sm:text-sm text-[#202328] placeholder-neutral-400 p-4 rounded-2xl border border-black/15 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all resize-y leading-relaxed"
+                  className="w-full flex-1 min-h-[160px] bg-[#EBECEF]/40 focus:bg-white text-xs sm:text-sm text-[#202328] placeholder-neutral-500 p-4 rounded-2xl border border-black/20 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all resize-y leading-relaxed"
                 />
               </div>
             </div>
@@ -181,10 +181,10 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
               type="submit"
               disabled={!isValid || isSubmitting}
               id="btn-submit-question"
-              className={`w-full sm:w-auto px-6 py-2.5 rounded-full font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer ${
+              className={`w-full sm:w-auto px-6 py-2.5 rounded-full font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-xs ${
                 isValid && !isSubmitting
-                  ? "bg-[#202328] hover:bg-black text-white"
-                  : "bg-black/10 text-neutral-400 cursor-not-allowed"
+                  ? "bg-[#202328] hover:bg-black text-white cursor-pointer"
+                  : "bg-neutral-200 text-neutral-600 border border-neutral-300 cursor-not-allowed"
               }`}
             >
               {isSubmitting ? (
