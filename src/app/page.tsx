@@ -8,8 +8,11 @@ import { AnonymousQuestion } from "@/types";
 import { saveQuestionToLocalStorage } from "@/lib/storage";
 
 export default function HomePage() {
+  const [refreshTrigger, setRefreshTrigger] = React.useState<number>(0);
+
   const handleQuestionSubmitted = (created: AnonymousQuestion) => {
     saveQuestionToLocalStorage(created);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const scrollToAsk = () => {
@@ -42,15 +45,15 @@ export default function HomePage() {
             id="qa-dual-grid-section"
             className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-14 sm:pb-20 relative z-10"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
               {/* Left Column: Ask Anonymous Question Card */}
-              <div className="w-full">
+              <div className="w-full h-full flex flex-col">
                 <AskQuestionSection onQuestionSubmitted={handleQuestionSubmitted} />
               </div>
 
               {/* Right Column: All Questions Display Card with Search */}
-              <div className="w-full">
-                <AllQuestionsCard />
+              <div className="w-full h-full flex flex-col">
+                <AllQuestionsCard refreshTrigger={refreshTrigger} />
               </div>
             </div>
           </section>

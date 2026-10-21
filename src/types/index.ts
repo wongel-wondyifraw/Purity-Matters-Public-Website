@@ -30,7 +30,8 @@ export type QuestionCategory =
   | "Relationships & Boundaries"
   | "Inner Healing & Trauma"
   | "Spiritual Warfare"
-  | "General Inquiry";
+  | "General Inquiry"
+  | "Other";
 
 export const QUESTION_CATEGORIES: QuestionCategory[] = [
   "Habitual Triggers",
@@ -39,4 +40,6 @@ export const QUESTION_CATEGORIES: QuestionCategory[] = [
   "Inner Healing & Trauma",
   "Spiritual Warfare",
   "General Inquiry",
+  "Other",
 ];
+

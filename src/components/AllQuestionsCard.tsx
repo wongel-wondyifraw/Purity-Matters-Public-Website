@@ -14,7 +14,11 @@ import {
 import { AnonymousQuestion, QUESTION_CATEGORIES } from "@/types";
 import { fetchPublicWisdomQuestions } from "@/services/api";
 
-export function AllQuestionsCard() {
+interface AllQuestionsCardProps {
+  refreshTrigger?: number;
+}
+
+export function AllQuestionsCard({ refreshTrigger }: AllQuestionsCardProps = {}) {
   const [questions, setQuestions] = useState<AnonymousQuestion[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -22,24 +26,61 @@ export function AllQuestionsCard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadQuestions = async () => {
-    setIsRefreshing(true);
+  const loadQuestions = async (silent = false) => {
+    if (!silent) {
+      setIsRefreshing(true);
+    }
     try {
       const data = await fetchPublicWisdomQuestions();
       if (Array.isArray(data)) {
         setQuestions(data);
       }
     } catch (err) {
-      console.warn("Could not load public questions:", err);
+      if (!silent) {
+        console.warn("Could not load public questions:", err);
+      }
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
+      if (!silent) {
+        setIsRefreshing(false);
+      }
     }
   };
 
+  // Initial load + Silent auto-update every 8 seconds + window focus detection
   useEffect(() => {
-    loadQuestions();
+    loadQuestions(false);
+
+    // Auto-poll questions in the background every 8 seconds
+    const intervalId = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        loadQuestions(true);
+      }
+    }, 8000);
+
+    // Immediate refresh whenever user switches back to this browser tab
+    const handleVisibilityOrFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        loadQuestions(true);
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+    };
   }, []);
+
+  // Immediate refresh when a new question is submitted locally
+  useEffect(() => {
+    if (refreshTrigger !== undefined && refreshTrigger > 0) {
+      loadQuestions(true);
+    }
+  }, [refreshTrigger]);
 
   const filteredQuestions = useMemo(() => {
     return questions.filter((q) => {
@@ -73,10 +114,10 @@ export function AllQuestionsCard() {
   };
 
   return (
-    <div id="all-questions-card" className="w-full">
-      <div className="bg-white/85 backdrop-blur-xl border border-black/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col">
+    <div id="all-questions-card" className="w-full h-full flex flex-col">
+      <div className="bg-white/85 backdrop-blur-xl border border-black/[0.08] rounded-3xl p-6 sm:p-8 shadow-sm flex-1 flex flex-col">
         {/* Card Header */}
-        <div className="flex items-center justify-between gap-4 border-b border-black/[0.06] pb-5 mb-5">
+        <div className="flex items-center justify-between gap-4 border-b border-black/[0.06] pb-5 mb-5 min-h-[64px]">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2.5 h-2.5 rounded-full bg-[#F6CE46]" />
@@ -95,7 +136,7 @@ export function AllQuestionsCard() {
           <button
             type="button"
             title="Refresh questions"
-            onClick={loadQuestions}
+            onClick={() => loadQuestions(false)}
             disabled={isRefreshing}
             className="p-2 rounded-xl text-neutral-400 hover:text-[#202328] hover:bg-black/[0.04] transition-all cursor-pointer disabled:opacity-50"
           >
@@ -228,7 +269,7 @@ export function AllQuestionsCard() {
                           <div className="flex items-center gap-1.5 font-semibold text-[#F6CE46]">
                             <User className="w-3.5 h-3.5" />
                             <span>
-                              {item.assignedCounselor || "Pastoral Counsel"}
+                              {item.assignedCounselor || "Counselor"}
                             </span>
                           </div>
                           <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">

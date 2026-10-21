@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   experimental: {
     cpus: 1,
   },
+  turbopack: {},
   webpack: (config) => {
     return config;
   },

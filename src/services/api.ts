@@ -46,8 +46,9 @@ export async function fetchPublicWisdomQuestions(
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
     },
-    next: { revalidate: 15 },
+    cache: "no-store",
   });
 
   if (!res.ok) {
