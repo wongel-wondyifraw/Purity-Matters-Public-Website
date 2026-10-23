@@ -1,19 +1,30 @@
 "use client";
 
 import React from "react";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, Sparkles } from "lucide-react";
+import { AnonymousQuestion } from "@/types";
+import { GoogleSearchBar } from "@/components/GoogleSearchBar";
 
 interface HeroProps {
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  allQuestions: AnonymousQuestion[];
+  onSelectQuestion: (question: AnonymousQuestion) => void;
   onScrollToAsk: () => void;
 }
 
-export function Hero({ onScrollToAsk }: HeroProps) {
+export function Hero({
+  searchQuery,
+  onSearchChange,
+  allQuestions,
+  onSelectQuestion,
+  onScrollToAsk,
+}: HeroProps) {
   return (
     <section
       id="hero-section"
-      className="relative w-full pt-14 pb-4 sm:pt-20 sm:pb-6 overflow-hidden flex flex-col items-center justify-center text-center"
+      className="relative w-full pt-10 pb-8 sm:pt-16 sm:pb-12 overflow-hidden flex flex-col items-center justify-center text-center"
     >
-
       {/* Floating Anonymity & Security Small SVGs Across the Full Width */}
       {/* 1. Incognito Fedora & Shades (Far Left Top) */}
       <div
@@ -110,65 +121,22 @@ export function Hero({ onScrollToAsk }: HeroProps) {
         </svg>
       </div>
 
-      {/* 5. Discreet Eye-Off Visor (Bottom Left) */}
-      <div
-        id="float-svg-eye-off"
-        className="absolute bottom-5 left-8 sm:left-16 lg:left-28 xl:left-40 pointer-events-none select-none z-0 opacity-35 animate-float-2"
-        style={{ filter: "drop-shadow(0 0 12px rgba(246, 206, 70, 0.8))" }}
-      >
-        <svg
-          viewBox="0 0 48 48"
-          className="w-6 h-6 sm:w-7 sm:h-7 text-[#202328]"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M8 24 C13 16, 20 12, 24 12 C28 12, 35 16, 40 24 C35 32, 28 36, 24 36 C20 36, 13 32, 8 24 Z"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            fill="currentColor"
-            fillOpacity="0.06"
-          />
-          <circle cx="24" cy="24" r="5" fill="#F6CE46" />
-          <path d="M10 38 L38 10" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-        </svg>
-      </div>
-
-      {/* 6. Anonymity Fingerprint Shroud (Bottom Right) */}
-      <div
-        id="float-svg-fingerprint"
-        className="absolute bottom-5 right-8 sm:right-16 lg:right-28 xl:right-40 pointer-events-none select-none z-0 opacity-35 animate-float-3"
-        style={{ filter: "drop-shadow(0 0 12px rgba(246, 206, 70, 0.8))" }}
-      >
-        <svg
-          viewBox="0 0 48 48"
-          className="w-6 h-6 sm:w-7 sm:h-7 text-[#202328]"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M24 10 C18 10, 14 14, 14 20 C14 28, 17 34, 19 38" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M24 15 C20 15, 18 18, 18 22 C18 29, 21 34, 23 37" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M24 20 C23 20, 22 21, 22 23 C22 27, 24 31, 25 34" stroke="#F6CE46" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M29 12 C33 15, 34 20, 34 25 C34 31, 31 35, 29 38" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </div>
-
       {/* Foreground Hero Content (Centered) */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 text-center flex flex-col items-center justify-center">
         {/* Brand Top Headline: Purity Matters with Yellow Dot */}
         <div
           id="brand-top-headline"
-          className="flex items-center justify-center gap-2.5 sm:gap-3.5 mb-3 sm:mb-4 text-center"
+          className="flex items-center justify-center gap-2.5 sm:gap-3.5 mb-2 sm:mb-3 text-center"
         >
           <span
-            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#F6CE46] ring-2 ring-[#202328]/20 shadow-[0_0_18px_#F6CE46] animate-pulse shrink-0"
+            className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#F6CE46] ring-2 ring-[#202328]/20 shadow-[0_0_18px_#F6CE46] animate-pulse shrink-0"
             aria-hidden="true"
           />
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#202328] text-center">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#202328] text-center">
             Purity Matters
           </h1>
           <span
-            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full opacity-0 pointer-events-none shrink-0"
+            className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full opacity-0 pointer-events-none shrink-0"
             aria-hidden="true"
           />
         </div>
@@ -176,17 +144,13 @@ export function Hero({ onScrollToAsk }: HeroProps) {
         {/* Prominent Question Headline: "What Are You Struggling With?" */}
         <div
           id="question-invitation-headline"
-          className="w-full flex items-center justify-center text-center mb-3 sm:mb-4"
+          className="w-full flex items-center justify-center text-center mb-2 sm:mb-3"
         >
-          <h2 className="inline-flex items-center justify-center gap-2 sm:gap-3 text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-black tracking-tight text-[#202328] text-center">
-            <span
-              className="w-6 sm:w-8 md:w-10 h-8 sm:h-11 md:h-13 opacity-0 pointer-events-none shrink-0"
-              aria-hidden="true"
-            />
+          <h2 className="inline-flex items-center justify-center gap-2 text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-[#202328] text-center">
             <span className="text-center">What Are You Struggling With</span>
             <svg
               viewBox="0 0 14 22"
-              className="w-6 h-8 sm:w-8 sm:h-11 md:w-10 md:h-13 inline-block text-[#202328] -mb-1 shrink-0"
+              className="w-5 h-7 sm:w-7 sm:h-10 md:w-8 md:h-11 inline-block text-[#202328] -mb-1 shrink-0"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               aria-label="?"
@@ -210,24 +174,34 @@ export function Hero({ onScrollToAsk }: HeroProps) {
           </h2>
         </div>
 
-        {/* Sub-headline: Ask in Absolute Confidentiality */}
+        {/* Sub-headline */}
         <p
           id="sub-headline-confidentiality"
-          className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-[#202328]/85 mb-6 sm:mb-8 text-center"
+          className="text-sm sm:text-base md:text-lg font-medium tracking-tight text-[#202328]/80 mb-6 sm:mb-8 text-center max-w-2xl"
         >
-          Ask in Absolute Confidentiality.
+          Search answered inquiries, biblical wisdom, and pastoral guidance in absolute confidentiality.
         </p>
 
-        {/* Call to Actions */}
+        {/* Google-Style Search Bar with Semantic Recommendations */}
+        <div className="w-full mb-6">
+          <GoogleSearchBar
+            searchQuery={searchQuery}
+            onSearchChange={onSearchChange}
+            allQuestions={allQuestions}
+            onSelectQuestion={onSelectQuestion}
+          />
+        </div>
+
+        {/* Smooth Link to Ask Question */}
         <div className="flex items-center justify-center text-center">
           <button
             type="button"
-            id="btn-hero-ask"
+            id="btn-hero-scroll-ask"
             onClick={onScrollToAsk}
-            className="w-full sm:w-auto bg-[#202328] hover:bg-black text-white text-sm font-semibold px-7 py-3 rounded-full shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 mx-auto"
+            className="text-xs font-semibold text-[#202328] hover:text-black underline underline-offset-4 decoration-[#F6CE46] decoration-2 transition-all cursor-pointer flex items-center gap-1.5 py-1"
           >
-            <span>Ask Your Question Anonymously</span>
-            <ArrowDown className="w-4 h-4 text-[#F6CE46]" />
+            <span>Can&apos;t find your question? Ask Anonymously</span>
+            <ArrowDown className="w-3.5 h-3.5 text-[#202328]" />
           </button>
         </div>
       </div>

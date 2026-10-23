@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Send, CheckCircle2, AlertCircle, ChevronDown, X } from "lucide-react";
-import { QuestionCategory, QUESTION_CATEGORIES, AnonymousQuestion } from "@/types";
+import { Send, CheckCircle2, AlertCircle, X, ShieldCheck } from "lucide-react";
+import { AnonymousQuestion } from "@/types";
 import { submitAnonymousQuestion } from "@/services/api";
 import { saveQuestionToLocalStorage } from "@/lib/storage";
 
@@ -12,8 +12,6 @@ interface AskQuestionSectionProps {
 
 export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionProps) {
   const [questionText, setQuestionText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<QuestionCategory>("Habitual Triggers");
-  const [customTopic, setCustomTopic] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -37,18 +35,12 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const categoryToSubmit =
-      selectedCategory === "Other"
-        ? (customTopic.trim() || "Other")
-        : selectedCategory;
-
     try {
-      const created = await submitAnonymousQuestion(questionText.trim(), categoryToSubmit);
-      // Save to localStorage for client-side tracking
+      // Direct question submission without category dropdown or case types
+      const created = await submitAnonymousQuestion(questionText.trim(), "General Inquiry");
       saveQuestionToLocalStorage(created);
       setShowToast(true);
       setQuestionText("");
-      setCustomTopic("");
       onQuestionSubmitted(created);
     } catch (err: any) {
       setErrorMessage(err.message || "Failed to submit inquiry. Please try again.");
@@ -58,7 +50,7 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
   };
 
   return (
-    <section id="ask-question-section" className="w-full h-full flex flex-col">
+    <section id="ask-question-section" className="w-full flex flex-col">
       {/* Floating Toast Notification */}
       {showToast && (
         <div
@@ -87,16 +79,24 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
         </div>
       )}
 
-      <div className="bg-white/95 backdrop-blur-xl border border-black/12 rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex-1 flex flex-col">
+      <div className="bg-white/95 backdrop-blur-xl border border-black/12 rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 border-b border-black/[0.06] pb-5 mb-5 min-h-[64px]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/[0.06] pb-5 mb-5">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-1">
               <span className="w-2.5 h-2.5 rounded-full bg-[#F6CE46] ring-2 ring-[#202328]/25" />
               <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#202328]">
-                Confidential Inquiry
+                Ask Your Question Anonymously
               </h2>
             </div>
+            <p className="text-xs sm:text-sm text-neutral-600 font-normal">
+              Can&apos;t find your struggle answered above? Submit your question in absolute confidence.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5 self-start sm:self-center px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>100% Anonymous</span>
           </div>
         </div>
 
@@ -108,75 +108,46 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between space-y-4 sm:space-y-5">
-          <div className="space-y-4 sm:space-y-5 flex-1 flex flex-col">
-            {/* Category Dropdown Selector */}
-            <div>
+        {/* Form - Question Submission Only (No Case Types or Dates) */}
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
               <label
-                htmlFor="category-select"
-                className="text-xs font-bold uppercase tracking-wider text-[#202328] block mb-2"
+                htmlFor="question-input"
+                className="text-xs font-bold uppercase tracking-wider text-[#202328]"
               >
-                1. Select Ministry Topic
+                Your Question or Struggle
               </label>
-              <div className="relative">
-                <select
-                  id="category-select"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value as QuestionCategory)}
-                  className="w-full appearance-none bg-[#EBECEF]/60 focus:bg-white text-xs sm:text-sm text-[#202328] font-medium py-3 px-4 pr-10 rounded-2xl border border-black/20 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all cursor-pointer"
-                >
-                  {QUESTION_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat} className="text-[#202328] bg-white py-1">
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-4 h-4 text-neutral-600 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-
-              {/* Optional Custom Topic Input when 'Other' is chosen */}
-              {selectedCategory === "Other" && (
-                <div className="mt-2.5">
-                  <input
-                    type="text"
-                    id="custom-topic-input"
-                    value={customTopic}
-                    onChange={(e) => setCustomTopic(e.target.value)}
-                    placeholder="Specify your topic (e.g. Identity, Addiction, Healing)..."
-                    className="w-full bg-[#EBECEF]/40 focus:bg-white text-xs sm:text-sm text-[#202328] placeholder-neutral-500 p-3 rounded-xl border border-black/20 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all"
-                  />
-                </div>
-              )}
+              <span
+                className={`text-[11px] font-mono ${
+                  charCount < 10
+                    ? "text-neutral-500 font-medium"
+                    : "text-emerald-700 font-bold"
+                }`}
+              >
+                {charCount} characters (min 10)
+              </span>
             </div>
 
-            {/* Question Textarea */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="question-input" className="text-xs font-bold uppercase tracking-wider text-[#202328]">
-                  2. Write Your Confidential Question
-                </label>
-                <span className={`text-[11px] font-mono ${charCount < 10 ? "text-neutral-600 font-medium" : "text-emerald-700 font-bold"}`}>
-                  {charCount} characters (min 10)
-                </span>
-              </div>
-
-              <div className="relative flex-1 flex flex-col">
-                <textarea
-                  id="question-input"
-                  required
-                  rows={5}
-                  value={questionText}
-                  onChange={(e) => setQuestionText(e.target.value)}
-                  placeholder="Describe your situation, struggle, or spiritual concern with honesty. You don't need to hold back—this is a safe, compassionate space..."
-                  className="w-full flex-1 min-h-[160px] bg-[#EBECEF]/40 focus:bg-white text-xs sm:text-sm text-[#202328] placeholder-neutral-500 p-4 rounded-2xl border border-black/20 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all resize-y leading-relaxed"
-                />
-              </div>
+            <div className="relative flex flex-col">
+              <textarea
+                id="question-input"
+                required
+                rows={5}
+                value={questionText}
+                onChange={(e) => setQuestionText(e.target.value)}
+                placeholder="Describe what you are struggling with, questions on sexual purity, guilt, emotional healing, or scripture guidance. You don't need to hold back—this is a safe, compassionate, and completely anonymous space..."
+                className="w-full min-h-[150px] bg-[#EBECEF]/40 focus:bg-white text-xs sm:text-sm text-[#202328] placeholder-neutral-500 p-4 rounded-2xl border border-black/20 focus:border-[#202328] focus:ring-1 focus:ring-[#202328] outline-none transition-all resize-y leading-relaxed"
+              />
             </div>
           </div>
 
           {/* Footer Submit Bar */}
-          <div className="flex items-center justify-end pt-3 mt-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+            <p className="text-[11px] text-neutral-500">
+              No email, name, or account required. All counseling is grounded in Scripture.
+            </p>
+
             <button
               type="submit"
               disabled={!isValid || isSubmitting}
@@ -184,19 +155,19 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
               className={`w-full sm:w-auto px-6 py-2.5 rounded-full font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-xs ${
                 isValid && !isSubmitting
                   ? "bg-[#202328] hover:bg-black text-white cursor-pointer"
-                  : "bg-neutral-200 text-neutral-600 border border-neutral-300 cursor-not-allowed"
+                  : "bg-neutral-200 text-neutral-500 border border-neutral-300 cursor-not-allowed"
               }`}
             >
               {isSubmitting ? (
-                <>
+                <div className="flex items-center gap-2">
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Submitting Privately...</span>
-                </>
+                </div>
               ) : (
-                <>
+                <div className="flex items-center gap-2">
                   <Send className="w-3.5 h-3.5 text-[#F6CE46]" />
                   <span>Send Anonymous Question</span>
-                </>
+                </div>
               )}
             </button>
           </div>
@@ -205,4 +176,3 @@ export function AskQuestionSection({ onQuestionSubmitted }: AskQuestionSectionPr
     </section>
   );
 }
-
