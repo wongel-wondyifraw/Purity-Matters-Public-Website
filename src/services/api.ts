@@ -1,4 +1,5 @@
 import { AnonymousQuestion } from "@/types";
+import { DEFAULT_PUBLIC_QUESTIONS } from "@/lib/defaultQuestions";
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
@@ -42,20 +43,38 @@ export async function fetchPublicWisdomQuestions(
     params.toString() ? `?${params.toString()}` : ""
   }`;
 
-  const res = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-cache",
-    },
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+      },
+      cache: "no-store",
+    });
 
-  if (!res.ok) {
-    return [];
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch questions from server, using curated wisdom questions:", err);
   }
 
-  return res.json();
+  // Graceful fallback to default curated questions
+  let results = [...DEFAULT_PUBLIC_QUESTIONS];
+  if (category && category !== "all") {
+    results = results.filter((q) => q.category.toLowerCase() === category.toLowerCase());
+  }
+  if (search && search.trim()) {
+    const s = search.toLowerCase().trim();
+    results = results.filter(
+      (q) => q.question.toLowerCase().includes(s) || (q.answer && q.answer.toLowerCase().includes(s))
+    );
+  }
+  return results;
 }
 
 export async function fetchMyQuestionsStatus(

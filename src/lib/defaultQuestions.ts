@@ -1,0 +1,108 @@
+import { AnonymousQuestion } from "@/types";
+
+export const DEFAULT_PUBLIC_QUESTIONS: AnonymousQuestion[] = [
+  {
+    id: 1,
+    referenceNumber: "PM-WIS-101",
+    category: "Guilt & Shame",
+    question: "How do I overcome overwhelming guilt and shame after relapsing into pornography again?",
+    answer:
+      "First, take a deep breath and hear Romans 8:1: 'There is now no condemnation for those who are in Christ Jesus.' Guilt says 'I made a mistake,' but shame lies and says 'I am a mistake.' The enemy uses shame to drive you into isolation and hiding—which is precisely where temptation thrives.\n\nWhen you fall, run TO God rather than FROM Him. Repentance is not self-flagellation; it is turning your face back to the Father who is already running toward you like the prodigal son's father. Break the silence by confessing to God and a trusted brother or sister in Christ (James 5:16). Grace is not a license to sin, but supernatural power to walk in renewed identity as God's beloved child.",
+    status: "answered",
+    assignedCounselor: "Pastor Daniel (Pastoral Care)",
+    isPublic: true,
+    createdAt: "2026-03-12T10:00:00Z",
+    answeredAt: "2026-03-12T16:30:00Z",
+  },
+  {
+    id: 2,
+    referenceNumber: "PM-WIS-102",
+    category: "Habitual Triggers",
+    question: "What practical steps can I take when late-night urges and compulsive triggers become unbearable?",
+    answer:
+      "Late-night temptation is often fueled by HALT: Hungry, Angry, Lonely, or Tired. When your physical or emotional tank is low, your brain seeks quick dopamine.\n\nHere is a practical emergency plan:\n1. Change your physical environment immediately—get out of bed, turn on the lights, drink cold water, or do 20 pushups.\n2. Keep all screens (phones, tablets, laptops) charging outside your bedroom permanently. An alarm clock costs $10; your spiritual peace is priceless.\n3. Pray out loud or read Psalm 91. Hearing the spoken Word of God disarms mental racing.\n4. Call or text an accountability partner with a simple code word (e.g., 'Pray for me right now'). You do not have to fight in the dark alone.",
+    status: "answered",
+    assignedCounselor: "Minister Samuel (Addiction Recovery)",
+    isPublic: true,
+    createdAt: "2026-03-15T14:20:00Z",
+    answeredAt: "2026-03-15T19:00:00Z",
+  },
+  {
+    id: 3,
+    referenceNumber: "PM-WIS-103",
+    category: "General Inquiry",
+    question: "Is it possible for God to truly forgive me if I keep repeating the same sexual sin for years?",
+    answer:
+      "Yes, absolutely. Peter asked Jesus in Matthew 18:21, 'Lord, how often shall my brother sin against me, and I forgive him? Up to seven times?' Jesus replied, 'Not up to seven times, but up to seventy times seven.' If Jesus commands us to forgive boundlessly, His own mercy is infinitely greater.\n\nGod does not tire of forgiving you. Lamentations 3:22-23 reminds us that His mercies are new every morning. However, ongoing repetition often indicates an unhealed root—such as unprocessed trauma, loneliness, or an unrenewed mind. Forgiveness is always immediate upon repentance; sanctification and rewiring neural pathways is a daily walk requiring community, discipleship, and biblical counseling.",
+    status: "answered",
+    assignedCounselor: "Elder Michael (Biblical Counseling)",
+    isPublic: true,
+    createdAt: "2026-03-18T09:15:00Z",
+    answeredAt: "2026-03-18T13:45:00Z",
+  },
+  {
+    id: 4,
+    referenceNumber: "PM-WIS-104",
+    category: "Relationships & Boundaries",
+    question: "How should I bring up my past sexual struggles or addiction to my fiancé before marriage?",
+    answer:
+      "Transparency is the cornerstone of biblical marriage, but timing and pastoral wisdom are essential.\n\nKey principles for disclosure:\n1. Timing: Disclose before marriage vows, but after you are securely committed to the relationship (typically during formal engagement or serious courtship, not on a first date).\n2. Tone: Be honest about the struggle and your recovery journey, but avoid giving explicit, graphic details that could create unnecessary intrusive imagery for your partner.\n3. Fruits of Repentance: Share the concrete boundaries, accountability software, and mentors you have in place.\n4. Space to Process: Give your fiancé time and grace to process emotions, ask questions, or pray without pressuring them for immediate reassurance. We strongly encourage premarital counseling with a pastor to navigate this together with grace.",
+    status: "answered",
+    assignedCounselor: "Counselor Ruth & Pastor Daniel",
+    isPublic: true,
+    createdAt: "2026-03-22T11:30:00Z",
+    answeredAt: "2026-03-22T17:10:00Z",
+  },
+  {
+    id: 5,
+    referenceNumber: "PM-WIS-105",
+    category: "Inner Healing & Trauma",
+    question: "How do I heal from deep emotional wounds and past childhood neglect that seem to drive my compulsive habits?",
+    answer:
+      "Compulsive behaviors are frequently an attempt to self-medicate legitimate God-given longings (to be loved, safe, and seen) with illegitimate counterfeits. When childhood needs were neglected, the heart learned to self-soothe through sexual fantasy or secrecy.\n\nInner healing begins with bringing those wounded memories into the presence of Jesus (Psalm 34:18: 'The Lord is close to the brokenhearted and saves those who are crushed in spirit'). In Christian counseling, we walk with you through grieving unmet needs, forgiving those who failed you, and receiving the Father's unconditional validation. You don't have to keep medicating pain with impurity when the Living Water satisfies.",
+    status: "answered",
+    assignedCounselor: "Dr. Elizabeth (Inner Healing & Pastoral Care)",
+    isPublic: true,
+    createdAt: "2026-03-28T08:45:00Z",
+    answeredAt: "2026-03-28T15:20:00Z",
+  },
+  {
+    id: 6,
+    referenceNumber: "PM-WIS-106",
+    category: "Relationships & Boundaries",
+    question: "Can a married couple completely restore sexual intimacy and trust after betrayal or secret habits?",
+    answer:
+      "Yes, but restoration is a marathon, not a sprint. Healing requires two distinct journeys: the struggling spouse must pursue genuine repentance and absolute honesty, while the betrayed spouse needs safety, validation of pain, and space to heal.\n\nTrust cannot be demanded; it must be rebuilt brick by brick through consistent transparency (unlocked devices, unprompted honesty, accountability). With Christ, the ashes of betrayal can indeed become beauty (Isaiah 61:3). Many couples who walk through thorough biblical counseling report that their intimacy eventually became deeper and more truthful than it ever was prior to the crisis.",
+    status: "answered",
+    assignedCounselor: "Pastor Daniel (Marriage & Family Ministry)",
+    isPublic: true,
+    createdAt: "2026-04-02T13:00:00Z",
+    answeredAt: "2026-04-02T18:40:00Z",
+  },
+  {
+    id: 7,
+    referenceNumber: "PM-WIS-107",
+    category: "Spiritual Warfare",
+    question: "How can I distinguish between genuine Holy Spirit conviction and demonic condemnation?",
+    answer:
+      "This distinction is crucial for spiritual peace:\n\n• The Holy Spirit's Conviction is specific, uplifting, and points directly to Christ and His cross. It produces hope and says: 'This action was unworthy of who you are in Christ; turn to the Father and let Him cleanse you.' (2 Corinthians 7:10).\n\n• Demonic Condemnation is vague, crushing, and drives you into despair. It attacks your identity and says: 'You are a hypocrite, God is disgusted with you, you will never change, don't bother praying.' (Revelation 12:10 calls the devil the 'accuser of the brethren').\n\nWhenever a thought drives you away from prayer, it is not from God. Rebuke the accuser with the truth of the Word.",
+    status: "answered",
+    assignedCounselor: "Elder Michael (Spiritual Direction)",
+    isPublic: true,
+    createdAt: "2026-04-08T16:15:00Z",
+    answeredAt: "2026-04-08T20:00:00Z",
+  },
+  {
+    id: 8,
+    referenceNumber: "PM-WIS-108",
+    category: "Habitual Triggers",
+    question: "How do I establish healthy digital boundaries and find a trustworthy accountability partner?",
+    answer:
+      "Proverbs 27:17 declares, 'As iron sharpens iron, so one person sharpens another.' True freedom requires both systemic barriers and vulnerable relationship.\n\n1. Digital Boundaries: Use content filtering and accountability software (like Covenant Eyes or Canopy) on all devices. Turn off private browsing and delete triggering apps or social feeds.\n2. Choosing a Partner: Pick someone of the same gender who is spiritually mature, trustworthy with confidential information, and courageous enough to ask tough questions without judgment.\n3. Routine: Set a weekly check-in time. Do not just ask 'Did you fall?', but ask 'How is your heart? What were your stress levels this week?'",
+    status: "answered",
+    assignedCounselor: "Minister Samuel (Pastoral Care)",
+    isPublic: true,
+    createdAt: "2026-04-14T11:00:00Z",
+    answeredAt: "2026-04-14T15:30:00Z",
+  },
+];

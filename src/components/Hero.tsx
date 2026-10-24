@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { ArrowDown, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowDown, ArrowRight, Sparkles, BookOpen, Send } from "lucide-react";
 import { AnonymousQuestion } from "@/types";
 import { GoogleSearchBar } from "@/components/GoogleSearchBar";
 
@@ -23,13 +24,13 @@ export function Hero({
   return (
     <section
       id="hero-section"
-      className="relative w-full pt-10 pb-8 sm:pt-16 sm:pb-12 overflow-hidden flex flex-col items-center justify-center text-center"
+      className="relative w-full min-h-screen min-h-[100dvh] py-10 px-4 overflow-hidden flex flex-col items-center justify-center text-center"
     >
       {/* Floating Anonymity & Security Small SVGs Across the Full Width */}
       {/* 1. Incognito Fedora & Shades (Far Left Top) */}
       <div
         id="float-svg-incognito"
-        className="absolute top-6 left-4 sm:left-10 lg:left-20 xl:left-32 pointer-events-none select-none z-0 opacity-40 animate-float-1"
+        className="absolute top-10 left-4 sm:left-10 lg:left-20 xl:left-32 pointer-events-none select-none z-0 opacity-40 animate-float-1"
         style={{ filter: "drop-shadow(0 0 12px rgba(246, 206, 70, 0.8))" }}
       >
         <svg
@@ -50,7 +51,7 @@ export function Hero({
       {/* 2. Anonymous Mask (Far Right Top) */}
       <div
         id="float-svg-mask"
-        className="absolute top-8 right-5 sm:right-12 lg:right-20 xl:right-32 pointer-events-none select-none z-0 opacity-40 animate-float-2"
+        className="absolute top-12 right-5 sm:right-12 lg:right-20 xl:right-32 pointer-events-none select-none z-0 opacity-40 animate-float-2"
         style={{ filter: "drop-shadow(0 0 12px rgba(246, 206, 70, 0.8))" }}
       >
         <svg
@@ -121,8 +122,8 @@ export function Hero({
         </svg>
       </div>
 
-      {/* Foreground Hero Content (Centered) */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 text-center flex flex-col items-center justify-center">
+      {/* Foreground Hero Content (Vertically and Horizontally Centered like Google) */}
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 text-center flex flex-col items-center justify-center my-auto">
         {/* Brand Top Headline: Purity Matters with Yellow Dot */}
         <div
           id="brand-top-headline"
@@ -132,7 +133,7 @@ export function Hero({
             className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#F6CE46] ring-2 ring-[#202328]/20 shadow-[0_0_18px_#F6CE46] animate-pulse shrink-0"
             aria-hidden="true"
           />
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#202328] text-center">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#202328] text-center">
             Purity Matters
           </h1>
           <span
@@ -182,8 +183,8 @@ export function Hero({
           Search answered inquiries, biblical wisdom, and pastoral guidance in absolute confidentiality.
         </p>
 
-        {/* Google-Style Search Bar with Semantic Recommendations */}
-        <div className="w-full mb-6">
+        {/* Google-Style Search Bar (Centered and prominent) */}
+        <div className="w-full">
           <GoogleSearchBar
             searchQuery={searchQuery}
             onSearchChange={onSearchChange}
@@ -192,16 +193,32 @@ export function Hero({
           />
         </div>
 
-        {/* Smooth Link to Ask Question */}
-        <div className="flex items-center justify-center text-center">
+        {/* Google-Style Action Buttons: Centered side-by-side */}
+        <div
+          id="hero-action-buttons-group"
+          className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
+        >
+          {/* 1. All Questions Button */}
+          <Link
+            href="/questions"
+            id="btn-lead-all-questions"
+            className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-[#202328] font-bold text-xs sm:text-sm border border-black/15 hover:border-[#202328] shadow-xs hover:shadow-md transition-all group cursor-pointer"
+          >
+            <BookOpen className="w-4 h-4 text-[#202328] shrink-0" />
+            <span>All Questions</span>
+            <ArrowRight className="w-4 h-4 text-[#202328] group-hover:translate-x-1 transition-transform" />
+          </Link>
+
+          {/* 2. Ask Anonymously Button (Scrolls down to reveal asking section) */}
           <button
             type="button"
-            id="btn-hero-scroll-ask"
+            id="btn-hero-ask-anonymously"
             onClick={onScrollToAsk}
-            className="text-xs font-semibold text-[#202328] hover:text-black underline underline-offset-4 decoration-[#F6CE46] decoration-2 transition-all cursor-pointer flex items-center gap-1.5 py-1"
+            className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#202328] hover:bg-black text-[#F6CE46] font-bold text-xs sm:text-sm border border-[#202328] shadow-xs hover:shadow-md transition-all group cursor-pointer"
           >
-            <span>Can&apos;t find your question? Ask Anonymously</span>
-            <ArrowDown className="w-3.5 h-3.5 text-[#202328]" />
+            <Send className="w-3.5 h-3.5 text-[#F6CE46] shrink-0" />
+            <span>Ask Anonymously</span>
+            <ArrowDown className="w-3.5 h-3.5 text-[#F6CE46] group-hover:translate-y-0.5 transition-transform" />
           </button>
         </div>
       </div>

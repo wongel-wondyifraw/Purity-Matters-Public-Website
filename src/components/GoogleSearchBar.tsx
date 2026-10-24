@@ -1,61 +1,109 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { Search, X, Sparkles, MessageCircleQuestion, ArrowRight } from "lucide-react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Search, X, ArrowRight, Sparkles, ArrowUpRight } from "lucide-react";
 import { AnonymousQuestion } from "@/types";
-import {
-  searchSemanticQuestions,
-  SemanticMatch,
-} from "@/lib/semanticSearch";
+import { searchSemanticQuestions } from "@/lib/semanticSearch";
 
 interface GoogleSearchBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  allQuestions: AnonymousQuestion[];
-  onSelectQuestion: (question: AnonymousQuestion) => void;
+  allQuestions?: AnonymousQuestion[];
+  onSelectQuestion?: (question: AnonymousQuestion) => void;
 }
 
 export function GoogleSearchBar({
   searchQuery,
   onSearchChange,
-  allQuestions,
+  allQuestions = [],
   onSelectQuestion,
 }: GoogleSearchBarProps) {
-  const [isFocused, setIsFocused] = useState(false);
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Close dropdown on outside click
+  const [isFocused, setIsFocused] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+  // Compute semantic matches when query has text
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim();
+    if (!q || allQuestions.length === 0) return [];
+    return searchSemanticQuestions(q, allQuestions, 5);
+  }, [searchQuery, allQuestions]);
+
+  // Expand ONLY when focused, query is non-empty, AND there are similar results!
+  const hasSimilarResults = suggestions.length > 0;
+  const showDropdown = isFocused && searchQuery.trim().length > 0 && hasSimilarResults;
+
+  // Close dropdown on click outside
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsFocused(false);
+        setSelectedIndex(-1);
       }
-    }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const semanticMatches: SemanticMatch[] = React.useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    return searchSemanticQuestions(searchQuery, allQuestions, 5);
-  }, [searchQuery, allQuestions]);
-
-  const showDropdown = isFocused && semanticMatches.length > 0;
+  // Reset selected index when query changes
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [searchQuery]);
 
   const handleClear = () => {
     onSearchChange("");
+    setSelectedIndex(-1);
     inputRef.current?.focus();
   };
 
-  const handleQuestionClick = (q: AnonymousQuestion) => {
-    onSelectQuestion(q);
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = searchQuery.trim();
+
+    // If an item in suggestions is highlighted with keyboard
+    if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+      const selected = suggestions[selectedIndex].question;
+      handlePickQuestion(selected);
+      return;
+    }
+
     setIsFocused(false);
+    if (trimmed) {
+      router.push(`/questions?q=${encodeURIComponent(trimmed)}`);
+    } else {
+      router.push("/questions");
+    }
+  };
+
+  const handlePickQuestion = (q: AnonymousQuestion) => {
+    setIsFocused(false);
+    if (onSelectQuestion) {
+      onSelectQuestion(q);
+    } else {
+      router.push(`/questions?id=${q.id}`);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showDropdown) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+    } else if (e.key === "Escape") {
+      setIsFocused(false);
+      setSelectedIndex(-1);
+    }
   };
 
   return (
@@ -64,19 +112,28 @@ export function GoogleSearchBar({
       id="google-search-container"
       className="relative w-full max-w-3xl mx-auto z-30"
     >
-      {/* Search Input Bar (Google Pill Style) */}
+      {/* Search Box Container: Fixed 28px/32px pill radius permanently to prevent oval/egg distortion */}
       <div
-        id="google-search-bar"
-        className={`w-full bg-white transition-all duration-200 border ${
+        id="google-search-box"
+        className={`w-full bg-white border rounded-[28px] sm:rounded-[32px] overflow-hidden transition-[box-shadow,border-color] duration-200 ease-out ${
           showDropdown
-            ? "rounded-t-3xl rounded-b-none border-black/20 shadow-[0_12px_36px_rgba(0,0,0,0.12)] ring-2 ring-[#202328]"
-            : "rounded-full border-black/15 shadow-[0_4px_22px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] focus-within:shadow-[0_10px_35px_rgba(246,206,70,0.3)] focus-within:border-[#202328] focus-within:ring-2 focus-within:ring-[#202328]"
+            ? "shadow-[0_20px_50px_rgba(0,0,0,0.12)] border-black/25 ring-1 ring-black/10"
+            : "shadow-none border-black/15 hover:border-black/30 focus-within:border-[#202328]"
         }`}
       >
-        <div className="flex items-center px-5 sm:px-6 h-14 sm:h-16 gap-3 sm:gap-4">
-          {/* Search Icon */}
+        {/* Main Input Row */}
+        <form
+          onSubmit={handleSearchSubmit}
+          id="google-search-input-row"
+          className="flex items-center px-5 sm:px-6 h-14 sm:h-16 gap-3 sm:gap-4 relative"
+        >
+          {/* Search / Sparkle Icon */}
           <div className="shrink-0 text-neutral-500">
-            <Search className="w-5 h-5 sm:w-6 sm:h-6" />
+            {searchQuery.trim().length > 0 ? (
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#202328]" />
+            ) : (
+              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-400" />
+            )}
           </div>
 
           {/* Text Input */}
@@ -85,17 +142,13 @@ export function GoogleSearchBar({
             type="text"
             id="google-search-input"
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setIsFocused(true)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                setIsFocused(false);
-              }
-            }}
-            placeholder="Search existing struggles or questions (e.g. shame, pornography, lust, forgiveness)..."
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Search struggles or questions (e.g. shame, pornography, lust, forgiveness)..."
             autoComplete="off"
             spellCheck="false"
-            className="flex-1 bg-transparent text-sm sm:text-base text-[#202328] placeholder-neutral-500 outline-none font-medium"
+            className="flex-1 bg-transparent text-sm sm:text-base text-[#202328] placeholder-neutral-500 outline-none border-none ring-0 focus:ring-0 focus:outline-none font-medium"
           />
 
           {/* Clear Button */}
@@ -111,70 +164,105 @@ export function GoogleSearchBar({
             </button>
           )}
 
-          {/* Search Badge / Action */}
+          {/* Search Action Button */}
           <div className="shrink-0 pl-1 border-l border-black/10 flex items-center">
             <button
-              type="button"
-              onClick={() => {
-                setIsFocused(false);
-                document
-                  .getElementById("answered-questions-section")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
+              type="submit"
               id="btn-submit-search"
-              className="bg-[#202328] hover:bg-black text-[#F6CE46] text-xs font-bold px-3.5 sm:px-4 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="bg-[#202328] hover:bg-black text-[#F6CE46] text-xs font-bold px-3.5 sm:px-4 py-2 rounded-full transition-all flex items-center gap-1.5 cursor-pointer shadow-none ring-0 focus:ring-0"
             >
               <span>Search</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
-      </div>
+        </form>
 
-      {/* Semantic Search Recommendations Dropdown (Google Autocomplete / Instant Results) */}
-      {showDropdown && (
+        {/* Subtle Divider Line with Smooth Fade */}
         <div
-          id="semantic-recommendations-dropdown"
-          className="absolute left-0 right-0 top-full bg-white rounded-b-3xl border-x border-b border-black/20 shadow-[0_16px_40px_rgba(0,0,0,0.16)] overflow-hidden divide-y divide-black/[0.06] animate-in fade-in slide-in-from-top-1 duration-150 z-40"
-        >
-          {/* Matched Questions Section */}
-          <div id="matched-questions-group" className="p-3 sm:p-4">
-            <div className="flex items-center gap-1.5 px-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
-              <Sparkles className="w-3.5 h-3.5 text-[#F6CE46]" />
-              <span>Recommended Answered Questions</span>
-            </div>
+          className={`h-[1px] bg-black/[0.08] w-full transition-opacity duration-200 ${
+            showDropdown ? "opacity-100" : "opacity-0"
+          }`}
+        />
 
-            <div className="space-y-1">
-              {semanticMatches.map((match) => (
-                <button
-                  key={match.question.id}
-                  type="button"
-                  onClick={() => handleQuestionClick(match.question)}
-                  className="w-full text-left p-2.5 sm:p-3 rounded-2xl hover:bg-neutral-50 transition-all flex items-start gap-3 group cursor-pointer"
-                >
-                  <div className="w-7 h-7 rounded-xl bg-[#202328] text-[#F6CE46] flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
-                    <MessageCircleQuestion className="w-3.5 h-3.5" />
+        {/* Smooth Grid Accordion Expansion for Suggestions */}
+        <div
+          id="google-suggestions-wrapper"
+          style={{
+            display: "grid",
+            gridTemplateRows: showDropdown ? "1fr" : "0fr",
+            opacity: showDropdown ? 1 : 0,
+            transition:
+              "grid-template-rows 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 240ms ease",
+          }}
+          className="w-full text-left"
+        >
+          <div className="overflow-hidden">
+            <div id="semantic-suggestions-list" className="py-2.5">
+              <div className="px-5 py-1.5 flex items-center justify-between text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-[#202328]" />
+                  <span>Similar Answered Questions</span>
+                </span>
+                <span>Click to read</span>
+              </div>
+
+              {suggestions.map((item, index) => {
+                const isSelected = selectedIndex === index;
+                return (
+                  <div
+                    key={item.question.id}
+                    id={`suggestion-item-${item.question.id}`}
+                    onClick={() => handlePickQuestion(item.question)}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`px-5 py-3 flex items-start justify-between gap-3 cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-neutral-100/90 text-black"
+                        : "hover:bg-neutral-50 text-[#202328]"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className="mt-0.5 text-neutral-400 shrink-0">
+                        <Search className="w-4 h-4 text-neutral-500" />
+                      </div>
+
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-semibold text-[#202328] line-clamp-1">
+                          {item.question.question}
+                        </p>
+                        {item.matchedSnippet && (
+                          <p className="text-[11px] text-neutral-600 line-clamp-1">
+                            {item.matchedSnippet}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-[#202328] bg-[#F6CE46]/30 px-2.5 py-1 rounded-full group-hover:bg-[#F6CE46]">
+                      <span>Read</span>
+                      <ArrowRight className="w-3 h-3 text-[#202328]" />
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-semibold text-[#202328] group-hover:text-black line-clamp-1">
-                      {match.question.question}
-                    </p>
-                    {match.matchedSnippet && (
-                      <p className="text-[11px] sm:text-xs text-neutral-600 line-clamp-2 mt-0.5 leading-relaxed font-normal">
-                        <span className="font-semibold text-neutral-800">Counsel: </span>
-                        {match.matchedSnippet}
-                      </p>
-                    )}
-                  </div>
-                  <div className="shrink-0 self-center text-neutral-400 group-hover:text-[#202328] transition-colors">
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </button>
-              ))}
+                );
+              })}
+
+              {/* Footer link: Search all questions */}
+              <div
+                onClick={handleSearchSubmit}
+                className="mt-1 px-5 py-2.5 bg-neutral-50/80 hover:bg-neutral-100/90 flex items-center justify-between text-xs font-semibold text-[#202328] cursor-pointer border-t border-black/[0.06] transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Search all questions for &ldquo;{searchQuery}&rdquo;</span>
+                </span>
+                <div className="flex items-center gap-1 text-xs text-neutral-600 font-normal">
+                  <span>Explore All</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

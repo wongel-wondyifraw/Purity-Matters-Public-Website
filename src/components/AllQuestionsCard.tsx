@@ -5,13 +5,13 @@ import {
   ChevronDown,
   ChevronUp,
   User,
-  RefreshCw,
   HelpCircle,
   X,
   ArrowDown,
   CheckCircle2,
 } from "lucide-react";
 import { AnonymousQuestion } from "@/types";
+import { searchSemanticQuestions } from "@/lib/semanticSearch";
 
 interface AllQuestionsCardProps {
   questions: AnonymousQuestion[];
@@ -36,18 +36,19 @@ export function AllQuestionsCard({
   onRefresh,
   onScrollToAsk,
 }: AllQuestionsCardProps) {
-  // Filter questions by search query (without case types or category pills)
+  // Filter questions by keyword and semantic search
   const filteredQuestions = useMemo(() => {
     const sLower = searchQuery.toLowerCase().trim();
     if (!sLower) return questions;
 
+    const semanticResults = searchSemanticQuestions(searchQuery, questions, 20);
+    const semanticIds = new Set(semanticResults.map((m) => m.question.id));
     const words = sLower.split(/\s+/).filter((w) => w.length > 0);
 
     return questions.filter((q) => {
+      if (semanticIds.has(q.id)) return true;
       const qLower = (q.question || "").toLowerCase();
       const aLower = (q.answer || "").toLowerCase();
-
-      // Check if full query is substring or any keyword matches
       if (qLower.includes(sLower) || aLower.includes(sLower)) return true;
       return words.some((word) => qLower.includes(word) || aLower.includes(word));
     });
@@ -55,79 +56,58 @@ export function AllQuestionsCard({
 
   return (
     <section id="answered-questions-section" className="w-full flex flex-col">
-      <div className="bg-white/95 backdrop-blur-xl border border-black/12 rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex flex-col">
-        {/* Card Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/[0.06] pb-5 mb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#F6CE46] ring-2 ring-[#202328]/25" />
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#202328]">
-                Answered Questions & Biblical Guidance
-              </h2>
-              <span className="text-xs bg-[#202328] text-white font-bold px-2.5 py-0.5 rounded-full ml-1">
-                {filteredQuestions.length}
+      <div id="answered-questions-container" className="w-full flex flex-col shadow-none">
+        {/* Active Search Query Status Bar */}
+        {searchQuery && (
+          <div
+            id="search-status-bar"
+            className="flex items-center justify-between pb-3 px-1 text-xs text-neutral-600 font-medium"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-neutral-500">
+                Found {filteredQuestions.length} {filteredQuestions.length === 1 ? "question" : "questions"} for &ldquo;<span className="text-[#202328] font-semibold">{searchQuery}</span>&rdquo;
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-neutral-600 font-normal">
-              Explore biblical guidance and pastoral counsel provided to our community.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={onClearSearch}
-                className="text-xs bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-1.5 rounded-full font-medium transition-all flex items-center gap-1 cursor-pointer"
-                title="Reset search filter"
-              >
-                <span>Reset search</span>
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-
             <button
               type="button"
-              title="Refresh questions"
-              onClick={onRefresh}
-              disabled={isRefreshing}
-              className="p-2 rounded-xl text-neutral-600 hover:text-[#202328] hover:bg-black/[0.06] border border-black/10 hover:border-black/20 transition-all cursor-pointer disabled:opacity-50"
+              onClick={onClearSearch}
+              className="text-neutral-500 hover:text-[#202328] text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
+              title="Clear search query"
             >
-              <RefreshCw
-                className={`w-4 h-4 ${isRefreshing ? "animate-spin text-[#F6CE46]" : ""}`}
-              />
+              <span>Clear search</span>
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
+        )}
 
-        {/* Questions List (No dates, No case types) */}
+        {/* Questions List (No dates, No case types, No shadows) */}
         <div className="space-y-3">
           {isLoading ? (
-            <div className="py-16 text-center text-xs text-neutral-600 font-medium flex flex-col items-center justify-center gap-2.5">
+            <div className="py-12 text-center text-xs text-neutral-600 font-medium flex flex-col items-center justify-center gap-2.5">
               <span className="w-6 h-6 border-2 border-black/20 border-t-[#202328] rounded-full animate-spin" />
               <span>Loading answered inquiries...</span>
             </div>
           ) : filteredQuestions.length === 0 ? (
             <div
               id="empty-search-state"
-              className="py-12 px-6 text-center text-neutral-600 rounded-2xl bg-black/[0.02] border border-black/10 flex flex-col items-center justify-center"
+              className="py-10 px-6 text-center text-neutral-600 rounded-2xl bg-white border border-black/10 flex flex-col items-center justify-center shadow-none"
             >
-              <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mb-3">
-                <HelpCircle className="w-6 h-6 text-neutral-400" />
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center mb-2.5">
+                <HelpCircle className="w-5 h-5 text-neutral-400" />
               </div>
               <h3 className="text-sm font-bold text-[#202328] mb-1">
                 No answered questions found
               </h3>
-              <p className="text-xs text-neutral-600 max-w-md mb-5 leading-relaxed">
+              <p className="text-xs text-neutral-600 max-w-md mb-4 leading-relaxed">
                 {searchQuery
-                  ? `We could not find an answered inquiry matching "${searchQuery}". You can submit this question anonymously and our pastoral team will answer it.`
+                  ? `We could not find an answered inquiry matching "${searchQuery}". You can submit this question anonymously below and our pastoral team will answer it.`
                   : "There are currently no answered questions published yet."}
               </p>
               <button
                 type="button"
                 id="btn-empty-ask-question"
                 onClick={onScrollToAsk}
-                className="bg-[#202328] hover:bg-black text-[#F6CE46] text-xs font-semibold px-5 py-2.5 rounded-full shadow-xs transition-all cursor-pointer flex items-center gap-2"
+                className="bg-[#202328] hover:bg-black text-[#F6CE46] text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer flex items-center gap-1.5 shadow-none"
               >
                 <span>Ask this question anonymously</span>
                 <ArrowDown className="w-3.5 h-3.5" />
@@ -140,7 +120,7 @@ export function AllQuestionsCard({
                 <div
                   key={item.id}
                   id={`all-question-item-${item.id}`}
-                  className="rounded-2xl border border-black/10 hover:border-black/25 bg-white transition-all overflow-hidden shadow-2xs"
+                  className="rounded-2xl border border-black/10 hover:border-black/25 bg-white transition-all overflow-hidden shadow-none"
                 >
                   {/* Question Header Row (No dates, No category tag) */}
                   <div

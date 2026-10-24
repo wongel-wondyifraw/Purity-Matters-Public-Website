@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Hero } from "@/components/Hero";
 import { AskQuestionSection } from "@/components/AskQuestionSection";
-import { AllQuestionsCard } from "@/components/AllQuestionsCard";
+import { QuestionReaderModal } from "@/components/QuestionReaderModal";
 import { AnonymousQuestion } from "@/types";
 import { fetchPublicWisdomQuestions } from "@/services/api";
 import { saveQuestionToLocalStorage } from "@/lib/storage";
@@ -11,14 +11,11 @@ import { saveQuestionToLocalStorage } from "@/lib/storage";
 export default function HomePage() {
   const [questions, setQuestions] = useState<AnonymousQuestion[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<AnonymousQuestion | null>(null);
+  const [isReaderOpen, setIsReaderOpen] = useState<boolean>(false);
+  const [isAskVisible, setIsAskVisible] = useState<boolean>(false);
 
   const loadQuestions = useCallback(async (silent = false) => {
-    if (!silent) {
-      setIsRefreshing(true);
-    }
     try {
       const data = await fetchPublicWisdomQuestions();
       if (Array.isArray(data)) {
@@ -28,15 +25,10 @@ export default function HomePage() {
       if (!silent) {
         console.warn("Could not load public answered questions:", err);
       }
-    } finally {
-      setIsLoading(false);
-      if (!silent) {
-        setIsRefreshing(false);
-      }
     }
   }, []);
 
-  // Initial load + silent auto-poll every 8 seconds
+  // Initial load + silent auto-poll every 12 seconds
   useEffect(() => {
     loadQuestions(false);
 
@@ -44,7 +36,7 @@ export default function HomePage() {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {
         loadQuestions(true);
       }
-    }, 8000);
+    }, 12000);
 
     const handleFocus = () => {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {
@@ -62,27 +54,50 @@ export default function HomePage() {
     };
   }, [loadQuestions]);
 
+  // Open intake section automatically if URL hash or param specifies it
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (
+        window.location.hash === "#ask-question-section" ||
+        window.location.search.includes("ask")
+      ) {
+        setIsAskVisible(true);
+        setTimeout(() => {
+          document.getElementById("ask-question-section")?.scrollIntoView({ behavior: "smooth" });
+        }, 150);
+      }
+    }
+  }, []);
+
   const handleQuestionSubmitted = (created: AnonymousQuestion) => {
     saveQuestionToLocalStorage(created);
     loadQuestions(true);
   };
 
   const handleSelectQuestion = (q: AnonymousQuestion) => {
-    setSearchQuery(q.question);
-    setExpandedId(q.id);
-    document
-      .getElementById("answered-questions-section")
-      ?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleToggleExpand = (id: number) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setSelectedQuestion(q);
+    setIsReaderOpen(true);
   };
 
   const scrollToAsk = () => {
-    document
-      .getElementById("ask-question-section")
-      ?.scrollIntoView({ behavior: "smooth" });
+    setIsAskVisible(true);
+    setTimeout(() => {
+      const el = document.getElementById("qa-content-section");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => {
+          const input = document.getElementById("question-input");
+          if (input) input.focus();
+        }, 500);
+      }
+    }, 60);
+  };
+
+  const handleCloseAsk = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => {
+      setIsAskVisible(false);
+    }, 450);
   };
 
   return (
@@ -102,7 +117,7 @@ export default function HomePage() {
           <div className="absolute top-1/4 -left-24 w-[450px] h-[550px] bg-[#F6CE46]/14 rounded-full blur-[100px] pointer-events-none select-none z-0" />
           <div className="absolute top-1/3 -right-24 w-[450px] h-[550px] bg-[#F6CE46]/14 rounded-full blur-[100px] pointer-events-none select-none z-0" />
 
-          {/* 1. Hero with Google-like Search Bar & Semantic Recommendations on Top */}
+          {/* 1. Hero with Google-like Search Bar & Centered Action Buttons (Screen 1) */}
           <Hero
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -111,33 +126,29 @@ export default function HomePage() {
             onScrollToAsk={scrollToAsk}
           />
 
-          {/* 2. Main Centered Content Flow: Answered Questions first, followed by Ask Intake */}
-          <section
-            id="qa-content-section"
-            className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-14 sm:pb-20 relative z-10 space-y-8"
-          >
-            {/* Answered Questions Results List (Dates & Case Types Removed) */}
-            <div id="answered-questions-wrapper" className="w-full">
-              <AllQuestionsCard
-                questions={questions}
-                searchQuery={searchQuery}
-                onClearSearch={() => setSearchQuery("")}
-                expandedId={expandedId}
-                onToggleExpand={handleToggleExpand}
-                isLoading={isLoading}
-                isRefreshing={isRefreshing}
-                onRefresh={() => loadQuestions(false)}
-                onScrollToAsk={scrollToAsk}
-              />
-            </div>
-
-            {/* Ask Anonymous Question Section (Dropdowns & Dates Removed) */}
-            <div id="ask-question-wrapper" className="w-full">
-              <AskQuestionSection onQuestionSubmitted={handleQuestionSubmitted} />
-            </div>
-          </section>
+          {/* 2. Main Content Flow: Intake section fills the screen without leaving space on top (Screen 2) */}
+          {isAskVisible && (
+            <section
+              id="qa-content-section"
+              className="w-full min-h-screen min-h-[100dvh] flex flex-col items-center justify-center py-6 sm:py-10 px-3 sm:px-6 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500"
+            >
+              <div id="ask-question-wrapper" className="w-full max-w-4xl">
+                <AskQuestionSection
+                  onQuestionSubmitted={handleQuestionSubmitted}
+                  onClose={handleCloseAsk}
+                />
+              </div>
+            </section>
+          )}
         </div>
       </main>
+
+      {/* Question Reader Modal: Opens when a suggestion is clicked */}
+      <QuestionReaderModal
+        question={selectedQuestion}
+        isOpen={isReaderOpen}
+        onClose={() => setIsReaderOpen(false)}
+      />
     </div>
   );
 }
